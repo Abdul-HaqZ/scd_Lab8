@@ -1,41 +1,52 @@
-const request = require('test');
-const app = require('../book-lending-system/src/books'); 
+const request = require('supertest');
+const assert = require('assert');
+const app = require('../book-lending-system/src/books'); // Adjust path as needed
 
-describe("Book Lending System - Pakistan Data", () => {
+async function runTests() {
+    console.log("Running tests...");
 
-    test("Should return all books", async () => {
-        const response = await request(app).get('/books');
-        expect(response.status).toBe(200);
-        expect(response.body.length).toBeGreaterThan(0);
-    });
-//testttt
-    test("Should return books from Lahore", async () => {
-        const response = await request(app).get('/books/Lahore');
-        expect(response.status).toBe(200);
-        expect(response.body.some(book => book.city === "Lahore")).toBeTruthy();
-    });
+    try {
+        // Test: Get all books
+        let response = await request(app).get('/books');
+        assert.strictEqual(response.status, 200);
+        assert.ok(response.body.length > 0);
+        console.log("✅ Passed: Should return all books");
 
-    test("Should fail for a city with no books", async () => {
-        const response = await request(app).get('/books/Islamabad');
-        expect(response.status).toBe(404);
-    });
+        // Test: Get books from Lahore
+        response = await request(app).get('/books/Lahore');
+        assert.strictEqual(response.status, 200);
+        assert.ok(response.body.some(book => book.city === "Lahore"));
+        console.log("✅ Passed: Should return books from Lahore");
 
-    test("Should add a new book", async () => {
+        // Test: City with no books should return 404
+        response = await request(app).get('/books/Islamabad');
+        assert.strictEqual(response.status, 404);
+        console.log("✅ Passed: Should fail for a city with no books");
+
+        // Test: Add a new book
         const newBook = { title: "Zavia", author: "Ashfaq Ahmed", city: "Rawalpindi" };
-        const response = await request(app).post('/books').send(newBook);
-        expect(response.status).toBe(201);
-        expect(response.body.title).toBe("Zavia");
-    });
+        response = await request(app).post('/books').send(newBook);
+        assert.strictEqual(response.status, 201);
+        assert.strictEqual(response.body.title, "Zavia");
+        console.log("✅ Passed: Should add a new book");
 
-    test("Should fail to add a book with missing details", async () => {
-        const response = await request(app).post('/books').send({ title: "Incomplete Book" });
-        expect(response.status).toBe(400);
-    });
+        // Test: Adding a book with missing details should fail
+        response = await request(app).post('/books').send({ title: "Incomplete Book" });
+        assert.strictEqual(response.status, 400);
+        console.log("✅ Passed: Should fail to add a book with missing details");
 
-    test("Should delete a book", async () => {
-        const response = await request(app).delete('/books/1'); 
-        expect(response.status).toBe(200);
-        expect(response.body.message).toBe("Book deleted");
-    });
+        // Test: Delete a book
+        response = await request(app).delete('/books/1');
+        assert.strictEqual(response.status, 200);
+        assert.strictEqual(response.body.message, "Book deleted");
+        console.log("✅ Passed: Should delete a book");
 
-});
+        console.log("\nAll tests passed successfully! 🎉");
+    } catch (error) {
+        console.error("❌ Test failed:", error.message);
+        process.exit(1);
+    }
+}
+
+// Run the tests
+runTests();
