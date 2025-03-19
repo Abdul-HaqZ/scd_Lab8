@@ -1,6 +1,6 @@
 const request = require('supertest');
 const assert = require('assert');
-const app = require('../book-lending-system/src/books'); // Adjust path as needed
+const app = require('./src/books.js'); // Adjust path as needed
 
 async function runTests() {
     console.log("Running tests...");
@@ -50,3 +50,4 @@ async function runTests() {
 
 // Run the tests
 runTests();
+
